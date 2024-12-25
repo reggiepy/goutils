@@ -32,7 +32,7 @@ func NewLogger(config *LoggerConfig) (*zap.Logger, func()) {
 
 	var lj *lumberjack.Logger
 	// 创建文件日志输出 core
-	if config.InFile {
+	if config.InFile && config.File != "" {
 		lj = &lumberjack.Logger{
 			Filename:   config.File,
 			MaxSize:    config.MaxSize,    // 文件大小 (MB)
