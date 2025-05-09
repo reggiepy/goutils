@@ -68,15 +68,17 @@ func NewLogger(config *LoggerConfig) (*zap.Logger, func()) {
 	// 并希望跳过这些封装函数的调用栈，直接定位到业务代码的调用位置。这时就需要使用
 	logger := zap.New(core, zap.AddCaller())
 
-	// 可选：替换全局的 zap logger
-	zap.ReplaceGlobals(logger)
+	if config.ReplaceGlobals{
+		// 可选：替换全局的 zap logger
+		zap.ReplaceGlobals(logger)
+	}
 
 	// 1. zap.ReplaceGlobals 函数将当前初始化的 logger 替换到全局的 logger,
 	// 2. 使用 logger 的时候 直接通过 zap.S().Debugf("xxx") or zap.L().Debug("xxx")
 	// 3. 使用 zap.S() 和 zap.L() 提供全局锁，保证一个全局的安全访问logger的方式
 	// zap.ReplaceGlobals(logger) // 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
-	// zap.L().Debug("")
-	// zap.S().Debugf("")
+	// zap.L().Debug("") // 结构化日志，性能更高，类型安全
+	// zap.S().Debugf("") // 糖衣日志（sugared），语法更简单，支持格式化输出，但性能略低
 	return logger, func() {
 		_ = logger.Sync() // 确保所有日志写入
 		if lj != nil {
