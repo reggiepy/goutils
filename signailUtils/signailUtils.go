@@ -15,6 +15,7 @@ var (
 	mu                 sync.Mutex       // 确保并发情况下对 shutdownHooks 的操作安全
 	once               sync.Once        // 确保退出函数只执行一次
 	wg                 sync.WaitGroup   // 确保所有协程都在程序退出前完成
+	shutdownStarted    bool
 )
 
 // SetExitMessageHandler - 设置自定义的退出消息处理函数
@@ -35,23 +36,31 @@ func GetExitMessageHandler() func(msg string) {
 
 // OnExit - 注册退出处理函数
 func OnExit(fnExit func()) {
-	mu.Lock()                                     // 获取锁以确保安全
-	defer mu.Unlock()                             // 解锁
-	shutdownHooks = append(shutdownHooks, fnExit) // 将退出处理函数添加到列表
-	wg.Add(1)                                     // 为每个退出钩子增加一个等待组
+	mu.Lock()
+	defer mu.Unlock()
+	if shutdownStarted {
+		panic("shutdown already in progress, can't register new hook")
+	}
+	shutdownHooks = append(shutdownHooks, fnExit)
+	wg.Add(1)
 }
 
 // ExecuteShutdownHooks - 执行所有注册的退出钩子函数，只执行一次
 func ExecuteShutdownHooks() {
 	GetExitMessageHandler()("准备退出,执行清理操作")
 	once.Do(func() { // 确保只执行一次
-		mu.Lock()         // 获取锁以确保安全
-		defer mu.Unlock() // 解锁
-		for _, fnExit := range shutdownHooks {
+		mu.Lock()                                      // 获取锁以确保安全
+		defer mu.Unlock()                              // 解锁
+		for i := len(shutdownHooks) - 1; i >= 0; i-- { // 倒序执行
 			go func(fn func()) {
-				defer wg.Done() // 每个钩子执行完毕后调用 Done
-				fn()            // 执行退出处理函数
-			}(fnExit)
+				defer wg.Done()
+				defer func() {
+					if r := recover(); r != nil {
+						GetExitMessageHandler()(logPanic(r))
+					}
+				}()
+				fn()
+			}(shutdownHooks[i])
 		}
 	})
 	GetExitMessageHandler()("程序清理完毕。")
@@ -59,10 +68,10 @@ func ExecuteShutdownHooks() {
 
 // WaitExit - 同步等待退出信号后退出，可指定自定义退出处理函数
 func WaitExit(timeout time.Duration) {
-	osc := make(chan os.Signal, 1)                      // 创建信号通道
-	signal.Notify(osc, syscall.SIGTERM, syscall.SIGINT) // 监听 SIGTERM 和 SIGINT 信号
+	sigChan := make(chan os.Signal, 1)                      // 创建信号通道
+	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT) // 监听 SIGTERM 和 SIGINT 信号
 
-	<-osc // 阻塞等待信号
+	GetExitMessageHandler()(logSignal(<-sigChan))// 阻塞等待信号
 	ExecuteShutdownHooks() // 执行已注册的退出钩子函数
 
 	// 等待所有退出钩子完成或超时
@@ -78,4 +87,19 @@ func WaitExit(timeout time.Duration) {
 	case <-time.After(timeout): // 设置超时时间
 		GetExitMessageHandler()("退出处理因超时而中止。")
 	}
+}
+
+// 工具函数：格式化 panic 日志
+func logPanic(r interface{}) string {
+	return "退出钩子发生 panic: " + formatAny(r)
+}
+
+// 工具函数：格式化信号日志
+func logSignal(sig os.Signal) string {
+	return "收到系统信号: " + sig.String()
+}
+
+// 工具函数：格式化 interface{}
+func formatAny(v interface{}) string {
+	return fmt.Sprintf("%v", v)
 }
