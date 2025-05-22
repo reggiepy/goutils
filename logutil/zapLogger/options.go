@@ -79,3 +79,10 @@ func WithReplaceGlobals(replaceGlobals bool) Option {
 		config.ReplaceGlobals = replaceGlobals
 	})
 }
+
+// WithCaller 设置是否替换全局日志记录器
+func WithCaller(Caller bool) Option {
+	return optionFunc(func(config *LoggerConfig) {
+		config.Caller = Caller
+	})
+}

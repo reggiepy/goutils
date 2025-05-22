@@ -66,9 +66,18 @@ func NewLogger(config *LoggerConfig) (*zap.Logger, func()) {
 	// zap.Addcaller() 输出日志打印文件和行数如： logger/logger_test.go:33
 	// zap.AddCallerSkip(1) 会记录调用日志的文件名和行号，但是有时候我们可能封装了日志方法，
 	// 并希望跳过这些封装函数的调用栈，直接定位到业务代码的调用位置。这时就需要使用
-	logger := zap.New(core, zap.AddCaller())
+	var options []zap.Option
+	if config.Caller {
+		options = append(options, zap.AddCaller())
+	}
+	logger := zap.New(
+		core,
+		//zap.AddCaller(),
+		//zap.AddCallerSkip(1),
+		options...,
+	)
 
-	if config.ReplaceGlobals{
+	if config.ReplaceGlobals {
 		// 可选：替换全局的 zap logger
 		zap.ReplaceGlobals(logger)
 	}

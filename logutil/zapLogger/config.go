@@ -14,6 +14,7 @@ type LoggerConfig struct {
 	Compress   bool   `json:"Compress" yaml:"Compress"`     // 是否压缩旧日志文件
 	Level      string `json:"LogLevel" yaml:"LogLevel"`     // 日志级别
 	Format     string `json:"LogFormat" yaml:"LogFormat"`   // 日志格式（如：json、logfmt）
+	Caller     bool   `json:"Caller" yaml:"Caller"`         // Caller
 }
 
 func (l *LoggerConfig) clone() *LoggerConfig {
