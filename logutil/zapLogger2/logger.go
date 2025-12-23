@@ -44,16 +44,33 @@ func NewLogger(opts ...Option) *Logger {
 	level := getLogLevel(config)
 
 	var cores []zapcore.Core
+	var lj *lumberjack.Logger
 
 	// 4. 构建文件输出 Core
-	fileCore, lj := buildFileCore(config, logFormat, level)
-	if fileCore != nil {
+	if config.InFile && config.File != "" {
+		lj = &lumberjack.Logger{
+			Filename:   config.File,
+			MaxSize:    config.MaxSize,    // 文件大小 (MB)
+			MaxBackups: config.MaxBackups, // 保留的最大文件个数
+			MaxAge:     config.MaxAge,     // 保留的最大天数
+			Compress:   config.Compress,   // 是否压缩
+		}
+
+		fileCore := zapcore.NewCore(
+			NewEncoder(logFormat),
+			zapcore.AddSync(lj), // 将日志写入文件
+			level,
+		)
 		cores = append(cores, fileCore)
 	}
 
 	// 5. 构建终端输出 Core
-	consoleCore := buildConsoleCore(config, logFormat, level)
-	if consoleCore != nil {
+	if config.InConsole {
+		consoleCore := zapcore.NewCore(
+			NewEncoder(logFormat),
+			zapcore.AddSync(os.Stdout), // 输出到终端
+			level,
+		)
 		cores = append(cores, consoleCore)
 	}
 
@@ -72,42 +89,6 @@ func NewLogger(opts ...Option) *Logger {
 		lj:     lj,
 		cores:  cores,
 	}
-}
-
-// buildFileCore 构建文件日志输出核心
-func buildFileCore(config *Config, logFormat string, level zapcore.Level) (zapcore.Core, *lumberjack.Logger) {
-	if !config.InFile || config.File == "" {
-		return nil, nil
-	}
-
-	lj := &lumberjack.Logger{
-		Filename:   config.File,
-		MaxSize:    config.MaxSize,    // 文件大小 (MB)
-		MaxBackups: config.MaxBackups, // 保留的最大文件个数
-		MaxAge:     config.MaxAge,     // 保留的最大天数
-		Compress:   config.Compress,   // 是否压缩
-	}
-
-	core := zapcore.NewCore(
-		NewEncoder(logFormat),
-		zapcore.AddSync(lj), // 将日志写入文件
-		level,
-	)
-
-	return core, lj
-}
-
-// buildConsoleCore 构建终端日志输出核心
-func buildConsoleCore(config *Config, logFormat string, level zapcore.Level) zapcore.Core {
-	if !config.InConsole {
-		return nil
-	}
-
-	return zapcore.NewCore(
-		NewEncoder(logFormat),
-		zapcore.AddSync(os.Stdout), // 输出到终端
-		level,
-	)
 }
 
 // buildZapOptions 构建 zap 选项

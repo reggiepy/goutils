@@ -44,8 +44,8 @@ func (l *Config) LoadJSON(jsonStr string) error {
 // NewConfig 创建并返回默认配置对象
 func NewConfig() *Config {
 	return &Config{
-		InFile:          true,      // 默认输出到文件
-		InConsole:       false,     // 默认不输出到控制台
+		InFile:          false,     // 默认不输出到文件
+		InConsole:       true,      // 默认输出到控制台
 		File:            "app.log", // 默认日志文件名
 		MaxSize:         1,         // 默认文件大小限制 1MB
 		MaxBackups:      5,         // 默认保留 5 个旧文件
