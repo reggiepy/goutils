@@ -63,19 +63,24 @@ func NewLogger(config *LoggerConfig, opts ...zap.Option) (*zap.Logger, func()) {
 	core := zapcore.NewTee(cores...)
 
 	// 构建 Logger 并添加调用者信息
-	// zap.Addcaller() 输出日志打印文件和行数如： logger/logger_test.go:33
-	// zap.AddCallerSkip(1) 会记录调用日志的文件名和行号，但是有时候我们可能封装了日志方法，
-	// 并希望跳过这些封装函数的调用栈，直接定位到业务代码的调用位置。这时就需要使用
 	var options []zap.Option
 	if config.Caller {
 		options = append(options, zap.AddCaller())
 	}
+	if config.CallerSkip > 0 {
+		options = append(options, zap.AddCallerSkip(config.CallerSkip))
+	}
+
+	// 设置堆栈跟踪级别
+	stackLevel, err := zapcore.ParseLevel(config.StacktraceLevel)
+	if err == nil {
+		options = append(options, zap.AddStacktrace(stackLevel))
+	}
+
 	options = append(options, opts...)
 
 	logger := zap.New(
 		core,
-		//zap.AddCaller(),
-		//zap.AddCallerSkip(1),
 		options...,
 	)
 

@@ -75,3 +75,17 @@ func TestLoggerConfig_ToJSON_LoadJSON(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "error", newConfig.Level)
 }
+
+func TestNewLoggerWithAdvancedOptions(t *testing.T) {
+	config := NewLoggerConfig(
+		WithCallerSkip(1),
+		WithStacktraceLevel("error"),
+	)
+
+	logger, cleanup := NewLogger(config)
+	defer cleanup()
+
+	assert.NotNil(t, logger)
+	assert.Equal(t, 1, config.CallerSkip)
+	assert.Equal(t, "error", config.StacktraceLevel)
+}
