@@ -10,9 +10,10 @@ import (
 
 // Logger 封装了 zap.Logger 和其底层的配置/资源
 type Logger struct {
-	*zap.Logger
-	lj    *lumberjack.Logger
-	cores []zapcore.Core
+	*zap.Logger                    // 底层 zap 日志实例
+	Config      *Config            // 日志配置信息
+	lj          *lumberjack.Logger // 日志轮转器
+	cores       []zapcore.Core     // 日志核心列表
 }
 
 // Close 安全关闭日志记录器，刷新缓冲并关闭文件句柄
@@ -67,6 +68,7 @@ func NewLogger(opts ...Option) *Logger {
 
 	return &Logger{
 		Logger: zapLogger,
+		Config: config,
 		lj:     lj,
 		cores:  cores,
 	}

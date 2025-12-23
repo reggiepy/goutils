@@ -16,6 +16,7 @@ func TestNewLogger(t *testing.T) {
 	defer logger.Close()
 
 	assert.NotNil(t, logger)
+	assert.NotNil(t, logger.Config)
 	logger.Info("Default v2 logger test")
 }
 
