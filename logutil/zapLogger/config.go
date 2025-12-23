@@ -4,7 +4,7 @@ import "encoding/json"
 
 type LoggerConfig struct {
 	InFile         bool `json:"InFile" yaml:"InFile"`                 // 是否输出到终端
-	InConsole      bool `json:"InConsole" yaml:"LogInFile"`           // 是否输出到文件
+	InConsole      bool `json:"InConsole" yaml:"InConsole"`           // 是否输出到文件
 	ReplaceGlobals bool `json:"ReplaceGlobals" yaml:"ReplaceGlobals"` // 是否替换全局日志记录器
 
 	File       string `json:"File" yaml:"File"`             // 日志文件名
@@ -41,7 +41,7 @@ func (l *LoggerConfig) WithOptions(options ...Option) *LoggerConfig {
 	return c
 }
 
-// NewConfig 创建默认配置
+// NewLoggerConfig 创建默认配置
 func NewLoggerConfig(opts ...Option) *LoggerConfig {
 	config := &LoggerConfig{
 		InFile:         true, // 默认同时输出到终端和文件

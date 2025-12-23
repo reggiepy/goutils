@@ -10,7 +10,7 @@ func (o optionFunc) apply(config *LoggerConfig) {
 	o(config)
 }
 
-// WithLogFile 设置日志文件名
+// WithFile 设置日志文件名
 func WithFile(file string) Option {
 	return optionFunc(func(config *LoggerConfig) {
 		config.File = file

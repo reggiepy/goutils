@@ -9,7 +9,7 @@ import (
 )
 
 // NewLogger 初始化Logger
-func NewLogger(config *LoggerConfig) (*zap.Logger, func()) {
+func NewLogger(config *LoggerConfig, opts ...zap.Option) (*zap.Logger, func()) {
 	var cores []zapcore.Core
 
 	// 支持的日志格式
@@ -70,6 +70,8 @@ func NewLogger(config *LoggerConfig) (*zap.Logger, func()) {
 	if config.Caller {
 		options = append(options, zap.AddCaller())
 	}
+	options = append(options, opts...)
+
 	logger := zap.New(
 		core,
 		//zap.AddCaller(),
