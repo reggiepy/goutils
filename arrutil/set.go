@@ -1,4 +1,4 @@
-package arrayUtils
+package arrutil
 
 type Set map[string]struct{}
 

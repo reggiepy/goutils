@@ -1,4 +1,4 @@
-package enumUtils
+package enumutil
 
 import (
 	"fmt"

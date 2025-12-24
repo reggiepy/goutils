@@ -7,34 +7,36 @@
 ## Installation
 
 ```bash
-go get github.com/reggiepy/goutils
+go get github.com/reggiepy/goutils/v2
 ```
 
 ## Features & Usage
 
-### 1. Logging (`logutil/zapLogger`)
+### 1. Logging
 
-A wrapper around [uber-go/zap](https://github.com/uber-go/zap) and [lumberjack](https://github.com/natefinch/lumberjack) for high-performance logging with file rotation support.
+#### V1: `logutil/zaputil` (Factory Pattern)
+
+Creates a standard `*zap.Logger` and returns a cleanup function.
 
 ```go
 package main
 
 import (
-	"github.com/reggiepy/goutils/logutil/zapLogger"
+	"github.com/reggiepy/goutils/v2/logutil/zaputil"
 	"go.uber.org/zap"
 )
 
 func main() {
 	// Create a default logger config
-	config := zapLogger.NewLoggerConfig(
-		zapLogger.WithFile("app.log"),
-		zapLogger.WithLogLevel("debug"),
-		zapLogger.WithInConsole(true),
-		zapLogger.WithInFile(true),
+	config := zaputil.NewLoggerConfig(
+		zaputil.WithFile("app.log"),
+		zaputil.WithLogLevel("debug"),
+		zaputil.WithInConsole(true),
+		zaputil.WithInFile(true),
 	)
 
 	// Initialize logger
-	logger, cleanup := zapLogger.NewLogger(config)
+	logger, cleanup := zaputil.NewLogger(config)
 	defer cleanup()
 
 	// Use the logger
@@ -43,9 +45,35 @@ func main() {
 }
 ```
 
-### 2. Signal Handling (`signailUtils`)
+#### V2: `logutil/zlog` (Wrapper Pattern)
 
-Graceful shutdown helper handling `SIGINT` and `SIGTERM`.
+Provides a `*zlog.Logger` wrapper that manages its own lifecycle (no cleanup function returned).
+
+```go
+package main
+
+import (
+	"github.com/reggiepy/goutils/v2/logutil/zlog"
+)
+
+func main() {
+	// Initialize logger directly with options
+	logger := zlog.NewLogger(
+		zlog.WithFile("app_v2.log"),
+		zlog.WithLogLevel("info"),
+		zlog.WithInConsole(true),
+	)
+	// Safe to defer Close()
+	defer logger.Close()
+
+	// Use the logger (inherits methods from zap.Logger)
+	logger.Info("V2 Logger started")
+}
+```
+
+### 2. System Utilities (`sysutil`)
+
+Helpers for system-level operations, including graceful shutdown handling.
 
 ```go
 package main
@@ -53,18 +81,18 @@ package main
 import (
 	"fmt"
 	"time"
-	"github.com/reggiepy/goutils/signailUtils"
+	"github.com/reggiepy/goutils/v2/sysutil"
 )
 
 func main() {
 	// Register cleanup tasks
-	signailUtils.OnExit(func() {
+	sysutil.OnExit(func() {
 		fmt.Println("Cleaning up database connections...")
 		time.Sleep(1 * time.Second) // Simulate work
 		fmt.Println("Database closed.")
 	})
 
-	signailUtils.OnExit(func() {
+	sysutil.OnExit(func() {
 		fmt.Println("Stopping HTTP server...")
 	})
 
@@ -72,11 +100,11 @@ func main() {
 	fmt.Println("App is running. Press Ctrl+C to exit.")
 
 	// Block and wait for exit signal (with 5s timeout for cleanup)
-	signailUtils.WaitExit(5 * time.Second)
+	sysutil.WaitExit(5 * time.Second)
 }
 ```
 
-### 3. Struct Utilities (`structUtils`)
+### 3. Struct Utilities (`structutil`)
 
 Helpers for struct manipulation, deep empty checks, and map conversion.
 
@@ -85,7 +113,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/reggiepy/goutils/structUtils"
+	"github.com/reggiepy/goutils/v2/structutil"
 )
 
 type User struct {
@@ -103,16 +131,16 @@ func main() {
 	dto := &UserDTO{}
 
 	// Copy fields with same name and type
-	structUtils.CopyIntersectionStruct(user, dto)
+	structutil.CopyIntersectionStruct(user, dto)
 	fmt.Println(dto.Name) // Output: Alice
 
 	// Check if struct is empty (deep check)
 	emptyUser := &User{}
-	fmt.Println(structUtils.IsStructEmpty(emptyUser)) // Output: true
+	fmt.Println(structutil.IsStructEmpty(emptyUser)) // Output: true
 }
 ```
 
-### 4. Array Utilities (`arrayUtils`)
+### 4. Array Utilities (`arrutil`)
 
 Common array/slice operations and a Set implementation.
 
@@ -121,18 +149,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/reggiepy/goutils/arrayUtils"
+	"github.com/reggiepy/goutils/v2/arrutil"
 )
 
 func main() {
 	// Check if item exists in slice
 	nums := []int{1, 2, 3}
-	if arrayUtils.InArray(2, nums) {
+	if arrutil.InArray(2, nums) {
 		fmt.Println("Found 2!")
 	}
 
 	// String Set
-	set := arrayUtils.NewSet("a", "b")
+	set := arrutil.NewSet("a", "b")
 	set.Add("c")
 	if set.Has("a") {
 		fmt.Println("Set has 'a'")
@@ -140,7 +168,7 @@ func main() {
 }
 ```
 
-### 5. Version Utilities (`versionUtils`)
+### 5. Version Utilities (`verutil`)
 
 Semantic versioning comparison helpers.
 
@@ -149,14 +177,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/reggiepy/goutils/versionUtils"
+	"github.com/reggiepy/goutils/v2/verutil"
 )
 
 func main() {
 	v1 := "1.2.3"
 	v2 := "1.3.0"
 
-	if versionUtils.LessThan(v1, v2) {
+	if verutil.LessThan(v1, v2) {
 		fmt.Printf("%s is older than %s\n", v1, v2)
 	}
 }
@@ -169,7 +197,7 @@ Simple wrapper for reading and writing YAML files.
 ```go
 package main
 
-import "github.com/reggiepy/goutils/yamlutil"
+import "github.com/reggiepy/goutils/v2/yamlutil"
 
 type Config struct {
 	Host string `yaml:"host"`
@@ -188,7 +216,7 @@ func main() {
 }
 ```
 
-### 7. Enum Utilities (`enumUtils`)
+### 7. Enum Utilities (`enumutil`)
 
 String-based enum validation.
 
@@ -197,12 +225,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/reggiepy/goutils/enumUtils"
+	"github.com/reggiepy/goutils/v2/enumutil"
 )
 
 func main() {
 	// Define allowed values
-	status := enumUtils.NewEnum([]string{"pending", "active", "closed"}, "pending")
+	status := enumutil.NewEnum([]string{"pending", "active", "closed"}, "pending")
 
 	// Set value with validation
 	err := status.Set("active")

@@ -1,4 +1,4 @@
-package zapLogger
+package zaputil
 
 type Option interface {
 	apply(config *LoggerConfig)

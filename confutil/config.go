@@ -1,4 +1,4 @@
-package configUtils
+package confutil
 
 // Config 接口定义通用的配置方法
 type Config interface {

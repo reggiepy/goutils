@@ -1,4 +1,4 @@
-package zapLogger
+package zaputil
 
 import "encoding/json"
 

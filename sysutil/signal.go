@@ -1,4 +1,4 @@
-package signailUtils
+package sysutil
 
 import (
 	"fmt"

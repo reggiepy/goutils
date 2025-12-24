@@ -1,4 +1,4 @@
-package structUtils
+package structutil
 
 import (
 	"encoding/json"

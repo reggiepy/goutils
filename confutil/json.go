@@ -1,4 +1,4 @@
-package configUtils
+package confutil
 
 import (
 	"encoding/json"

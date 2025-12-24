@@ -1,4 +1,4 @@
-package configUtils
+package confutil
 
 import "gopkg.in/yaml.v3"
 

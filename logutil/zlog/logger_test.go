@@ -1,4 +1,4 @@
-package zapLogger2
+package zlog
 
 import (
 	"encoding/json"
