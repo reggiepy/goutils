@@ -12,7 +12,7 @@ go get github.com/reggiepy/goutils/v2
 
 ### 1. 日志工具 (`logutil`)
 
-提供两种模式的日志封装，解决了与 `go.uber.org/zap` 包名冲突的问题。
+提供多种模式的日志封装，适应不同的项目需求。
 
 #### 模式一：`logutil/zaputil` (工厂模式)
 
@@ -68,6 +68,37 @@ func main() {
 
 	// 使用 logger (继承了 zap.Logger 的所有方法)
 	logger.Info("V2 Logger started")
+}
+```
+
+#### 模式三：接口抽象 (`logutil/logx`) 与 Zap 适配器 (`logutil/adapters/zapx`)
+
+提供一个极简的、无依赖的日志接口 `logx.Logger`，以及对应的 Zap 适配器。这允许你的业务逻辑依赖于接口而不是具体的日志实现，方便未来切换日志库。
+
+```go
+package main
+
+import (
+	"github.com/reggiepy/goutils/v2/logutil/logx"
+	"github.com/reggiepy/goutils/v2/logutil/adapters/zapx"
+	"go.uber.org/zap"
+)
+
+// 业务逻辑只依赖接口
+func RunBusinessLogic(logger logx.Logger) {
+	logger.Info("Business logic started", "module", "core")
+	// ...
+}
+
+func main() {
+	// 初始化 Zap Logger
+	zapLogger, _ := zap.NewProduction()
+	defer zapLogger.Sync()
+
+	// 创建适配器
+	logger := zapx.NewZapLogger(zapLogger)
+
+	RunBusinessLogic(logger)
 }
 ```
 

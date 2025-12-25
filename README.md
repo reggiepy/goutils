@@ -71,6 +71,37 @@ func main() {
 }
 ```
 
+#### Interface: `logutil/logx` & Adapter: `logutil/adapters/zapx`
+
+A minimal, dependency-agnostic logger interface `logx.Logger` and its Zap adapter `zapx.ZapLogger`. This allows your domain logic to depend on `logx.Logger` interface instead of concrete Zap implementation.
+
+```go
+package main
+
+import (
+	"github.com/reggiepy/goutils/v2/logutil/logx"
+	"github.com/reggiepy/goutils/v2/logutil/adapters/zapx"
+	"go.uber.org/zap"
+)
+
+// Domain logic depends on minimal interface
+func RunBusinessLogic(logger logx.Logger) {
+	logger.Info("Business logic started", "module", "core")
+	// ...
+}
+
+func main() {
+	// Setup Zap
+	zapLogger, _ := zap.NewProduction()
+	defer zapLogger.Sync()
+
+	// Adapt to logx.Logger
+	logger := zapx.NewZapLogger(zapLogger)
+
+	RunBusinessLogic(logger)
+}
+```
+
 ### 2. System Utilities (`sysutil`)
 
 Helpers for system-level operations, including graceful shutdown handling.
