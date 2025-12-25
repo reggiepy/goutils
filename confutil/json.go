@@ -7,9 +7,12 @@ import (
 type JsonConfigBase struct{}
 
 // ToJson 将配置转换为JSON格式
-func (jc *JsonConfigBase) ToJson(c interface{}) string {
-	jsonData, _ := json.MarshalIndent(c, "", "  ")
-	return string(jsonData)
+func (jc *JsonConfigBase) ToJson(c interface{}) (string, error) {
+	jsonData, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
 }
 
 // LoadJson 从JSON文件加载配置

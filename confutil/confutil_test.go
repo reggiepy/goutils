@@ -17,13 +17,14 @@ func TestJsonConfigBase(t *testing.T) {
 	cfg := TestConfig{Host: "localhost", Port: 8080}
 
 	// Test ToJson
-	jsonStr := base.ToJson(cfg)
+	jsonStr, err := base.ToJson(cfg)
+	as.NoError(err)
 	as.Contains(jsonStr, `"host": "localhost"`)
 	as.Contains(jsonStr, `"port": 8080`)
 
 	// Test LoadJson
 	var loadedCfg TestConfig
-	err := base.LoadJson(&loadedCfg, jsonStr)
+	err = base.LoadJson(&loadedCfg, jsonStr)
 	as.NoError(err)
 	as.Equal(cfg, loadedCfg)
 
@@ -38,13 +39,14 @@ func TestYamlConfigBase(t *testing.T) {
 	cfg := TestConfig{Host: "127.0.0.1", Port: 9090}
 
 	// Test ToYaml
-	yamlStr := base.ToYaml(cfg)
+	yamlStr, err := base.ToYaml(cfg)
+	as.NoError(err)
 	as.Contains(yamlStr, "host: 127.0.0.1")
 	as.Contains(yamlStr, "port: 9090")
 
 	// Test LoadYaml
 	var loadedCfg TestConfig
-	err := base.LoadYaml(&loadedCfg, yamlStr)
+	err = base.LoadYaml(&loadedCfg, yamlStr)
 	as.NoError(err)
 	as.Equal(cfg, loadedCfg)
 
