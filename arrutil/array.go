@@ -24,7 +24,7 @@ func InArray(needle interface{}, arr interface{}) (r bool) {
 			}
 		}
 	default:
-		panic(fmt.Errorf("[InArray]arr type must be array, slice or map").(any))
+		panic(fmt.Errorf("[InArray]arr type must be array, slice or map"))
 	}
 	return
 }

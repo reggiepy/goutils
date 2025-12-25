@@ -173,3 +173,48 @@ func TestStructToMap(t *testing.T) {
 		})
 	}
 }
+
+func TestIsEmptyStringField(t *testing.T) {
+	type TestStruct struct {
+		Name  string
+		Email string
+		Other int
+	}
+
+	ts := TestStruct{Name: "Alice", Email: ""}
+
+	// Check existing empty field
+	empty, err := IsEmptyStringField(ts, "Email")
+	assert.Error(t, err)
+	assert.True(t, empty)
+	assert.Contains(t, err.Error(), "缺少参数: Email")
+
+	// Check existing non-empty field
+	empty, err = IsEmptyStringField(ts, "Name")
+	assert.NoError(t, err)
+	assert.False(t, empty)
+
+	// Check multiple fields (one empty)
+	empty, err = IsEmptyStringField(ts, "Name", "Email")
+	assert.Error(t, err)
+	assert.True(t, empty)
+
+	// Check non-string field (should be ignored or handled? Implementation only checks Kind == String)
+	// If field is not found, FieldByName returns zero Value. Zero Value Kind is Invalid.
+	// Implementation: fieldValue.Kind() == reflect.String
+	// So non-string fields are ignored effectively.
+	empty, err = IsEmptyStringField(ts, "Other")
+	assert.NoError(t, err)
+	assert.False(t, empty)
+
+	// Check invalid input (not struct)
+	empty, err = IsEmptyStringField("not struct", "Name")
+	assert.Error(t, err)
+	assert.False(t, empty)
+	assert.Contains(t, err.Error(), "参数必须是一个结构体")
+
+	// Check pointer to struct
+	empty, err = IsEmptyStringField(&ts, "Email")
+	assert.Error(t, err)
+	assert.True(t, empty)
+}

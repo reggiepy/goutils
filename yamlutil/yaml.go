@@ -1,12 +1,13 @@
 package yamlutil
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 // WriteFile writes data to a YAML file.
-func WriteFile(filePath string, data any) error {
+func WriteFile(filePath string, data interface{}) error {
 	yamlBytes, err := yaml.Marshal(data)
 	if err != nil {
 		return err
@@ -15,7 +16,7 @@ func WriteFile(filePath string, data any) error {
 }
 
 // ReadFile reads YAML file data into the provided struct.
-func ReadFile(filePath string, v any) error {
+func ReadFile(filePath string, v interface{}) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -26,6 +27,6 @@ func ReadFile(filePath string, v any) error {
 
 // IsYAML checks if a string is valid YAML (returns true if valid YAML).
 func IsYAML(s string) bool {
-	var temp any
+	var temp interface{}
 	return yaml.Unmarshal([]byte(s), &temp) == nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // MustString encodes data to YAML string, will panic on error.
-func MustString(v any) string {
+func MustString(v interface{}) string {
 	bs, err := yaml.Marshal(v)
 	if err != nil {
 		panic(err)
@@ -16,40 +16,40 @@ func MustString(v any) string {
 }
 
 // Encode encodes data to YAML bytes. alias of yaml.Marshal
-func Encode(v any) ([]byte, error) {
+func Encode(v interface{}) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
 // EncodePretty encodes data to pretty YAML bytes with indentation.
-func EncodePretty(v any) ([]byte, error) {
+func EncodePretty(v interface{}) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
 // EncodeString encodes data to YAML string.
-func EncodeString(v any) (string, error) {
+func EncodeString(v interface{}) (string, error) {
 	bs, err := yaml.Marshal(v)
 	return string(bs), err
 }
 
 // EncodeToWriter encodes data to YAML and writes it to the writer.
-func EncodeToWriter(v any, w io.Writer) error {
+func EncodeToWriter(v interface{}, w io.Writer) error {
 	enc := yaml.NewEncoder(w)
 	defer enc.Close()
 	return enc.Encode(v)
 }
 
 // Decode decodes YAML bytes to data pointer. alias of yaml.Unmarshal
-func Decode(bts []byte, ptr any) error {
+func Decode(bts []byte, ptr interface{}) error {
 	return yaml.Unmarshal(bts, ptr)
 }
 
 // DecodeString decodes YAML string to data pointer.
-func DecodeString(str string, ptr any) error {
+func DecodeString(str string, ptr interface{}) error {
 	return yaml.Unmarshal([]byte(str), ptr)
 }
 
 // DecodeReader decodes YAML from io.Reader.
-func DecodeReader(r io.Reader, ptr any) error {
+func DecodeReader(r io.Reader, ptr interface{}) error {
 	dec := yaml.NewDecoder(r)
 	return dec.Decode(ptr)
 }

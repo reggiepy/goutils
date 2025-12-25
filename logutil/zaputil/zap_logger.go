@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// NewLogger 初始化Logger
 func NewLogger(config *LoggerConfig, opts ...zap.Option) (*zap.Logger, func()) {
 	var cores []zapcore.Core
 
@@ -25,7 +24,8 @@ func NewLogger(config *LoggerConfig, opts ...zap.Option) (*zap.Logger, func()) {
 	}
 
 	// 设置日志级别
-	level, err := zapcore.ParseLevel(config.Level)
+	var level zapcore.Level
+	err := level.UnmarshalText([]byte(config.Level))
 	if err != nil {
 		level = zapcore.InfoLevel
 	}
@@ -72,7 +72,8 @@ func NewLogger(config *LoggerConfig, opts ...zap.Option) (*zap.Logger, func()) {
 	}
 
 	// 设置堆栈跟踪级别
-	stackLevel, err := zapcore.ParseLevel(config.StacktraceLevel)
+	var stackLevel zapcore.Level
+	err = stackLevel.UnmarshalText([]byte(config.StacktraceLevel))
 	if err == nil {
 		options = append(options, zap.AddStacktrace(stackLevel))
 	}
@@ -89,12 +90,6 @@ func NewLogger(config *LoggerConfig, opts ...zap.Option) (*zap.Logger, func()) {
 		zap.ReplaceGlobals(logger)
 	}
 
-	// 1. zap.ReplaceGlobals 函数将当前初始化的 logger 替换到全局的 logger,
-	// 2. 使用 logger 的时候 直接通过 zap.S().Debugf("xxx") or zap.L().Debug("xxx")
-	// 3. 使用 zap.S() 和 zap.L() 提供全局锁，保证一个全局的安全访问logger的方式
-	// zap.ReplaceGlobals(logger) // 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
-	// zap.L().Debug("") // 结构化日志，性能更高，类型安全
-	// zap.S().Debugf("") // 糖衣日志（sugared），语法更简单，支持格式化输出，但性能略低
 	return logger, func() {
 		_ = logger.Sync() // 确保所有日志写入
 		if lj != nil {

@@ -103,7 +103,8 @@ func buildZapOptions(config *Config) []zap.Option {
 	}
 
 	// 设置堆栈跟踪级别
-	stackLevel, err := zapcore.ParseLevel(config.StacktraceLevel)
+	var stackLevel zapcore.Level
+	err := stackLevel.UnmarshalText([]byte(config.StacktraceLevel))
 	if err == nil {
 		options = append(options, zap.AddStacktrace(stackLevel))
 	}
@@ -128,7 +129,8 @@ func getLogFormat(config *Config) string {
 }
 
 func getLogLevel(config *Config) zapcore.Level {
-	level, err := zapcore.ParseLevel(config.Level)
+	var level zapcore.Level
+	err := level.UnmarshalText([]byte(config.Level))
 	if err != nil {
 		return zapcore.InfoLevel
 	}

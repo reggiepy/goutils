@@ -24,41 +24,41 @@ import (
 )
 
 func TestFull(t *testing.T) {
-	assert := assert.New(t)
+	as := assert.New(t)
 	version := "1.17.0"
 	arr := strings.Split(version, ".")
-	assert.Equal(3, len(arr))
+	as.Equal(3, len(arr))
 
 	proto, err := strconv.ParseInt(arr[0], 10, 64)
-	assert.NoError(err)
-	assert.True(proto >= 0)
+	as.NoError(err)
+	as.True(proto >= 0)
 
 	major, err := strconv.ParseInt(arr[1], 10, 64)
-	assert.NoError(err)
-	assert.True(major >= 0)
+	as.NoError(err)
+	as.True(major >= 0)
 
 	minor, err := strconv.ParseInt(arr[2], 10, 64)
-	assert.NoError(err)
-	assert.True(minor >= 0)
+	as.NoError(err)
+	as.True(minor >= 0)
 }
 
 func TestVersion(t *testing.T) {
-	assert := assert.New(t)
+	as := assert.New(t)
 	version := "1.17.0"
 	proto := Proto(version)
 	major := Major(version)
 	minor := Minor(version)
 	parseVerion := fmt.Sprintf("%d.%d.%d", proto, major, minor)
-	assert.Equal(parseVerion, version)
+	as.Equal(parseVerion, version)
 }
 
 func TestCompact(t *testing.T) {
-	assert := assert.New(t)
+	as := assert.New(t)
 	version := "1.15.0"
 	version2 := "1.18.0"
 	ok := LessThan(version2, version)
-	assert.False(ok)
+	as.False(ok)
 
 	ok = LessThan(version, version2)
-	assert.True(ok)
+	as.True(ok)
 }
