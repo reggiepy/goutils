@@ -54,7 +54,7 @@ func NewConfig() *Config {
 		Level:           "info",    // 默认日志级别为 info
 		Format:          "json",    // 默认使用 JSON 格式
 		ReplaceGlobals:  false,     // 默认不替换全局 zap logger
-		Caller:          true,      // 默认开启调用者信息
+		Caller:          false,     // 默认开启调用者信息
 		CallerSkip:      1,         // 默认跳过 1 层调用栈
 		StacktraceLevel: "panic",   // 默认 panic 级别才打印堆栈信息
 		ZapOptions:      make([]zap.Option, 0),
